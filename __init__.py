@@ -1,6 +1,6 @@
 """
-Stellar Evolution Exam Package
-A Duolingo-style adaptive examination system for stellar evolution courses.
+Exam Package
+A Duolingo-style adaptive examination system
 """
 
 from .exam import GamifiedExam, Difficulty

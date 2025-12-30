@@ -8,7 +8,7 @@ setup(
     version="0.1.0",
     author="Mathieu Renzo",
     author_email="mrenzo@arizona.edu",
-    description="A Duolingo-style exam system for stellar evolution",
+    description="A Duolingo-style exam system",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/mathren/gamified_exam",
@@ -33,7 +33,7 @@ setup(
         ],
     },
     package_data={
-        "stellar_exam": ["../data/*.txt"],
+        "gamified_exam": ["../data/*.txt"],
     },
     include_package_data=True,
 )

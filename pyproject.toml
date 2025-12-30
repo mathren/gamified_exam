@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "gamified-exam"
 version = "0.1.0"
-description = "A Duolingo-style exam system for stellar evolution"
+description = "A Duolingo-style exam system"
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "GPLv3"}

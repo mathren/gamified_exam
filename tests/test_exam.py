@@ -1,5 +1,5 @@
 import pytest
-from stellar_exam import LanguageExam, AutoGrader, Difficulty
+from gamified_exam import GamifiedExam, AutoGrader, Difficulty
 
 def test_grader_perfect_match():
     grader = AutoGrader()
