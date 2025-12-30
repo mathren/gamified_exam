@@ -21,7 +21,7 @@ class GamifiedExam:
     def load_questions(self, filename: str):
         """Load questions from text file.
 
-        Format per line: difficulty|points|prompt|answer|question_type, comments with #
+        Format per line: difficulty|points|question_type|prompt|answer, comments with #
         Example: BEGINNER|10|Translate: Hello|Hola
         """
         try:
@@ -40,7 +40,7 @@ class GamifiedExam:
                         else:
                             continue
 
-                    diff, points, prompt, answer, question_type = parts
+                    diff, points, question_type, prompt, answer = parts
 
                     self.questions.append(Question(
                         prompt=prompt.strip(),
@@ -123,16 +123,19 @@ class GamifiedExam:
                 break
 
             # check question type
-            if question.question_type == QuestionType.QUALITATIVE:
+            if question.question_type == QuestionType.TEXT:
                 # call qualitative answer parser
                 pass
-            elif question.question_type == QuestionType.QUANTITATIVE:
+            elif question.question_type == QuestionType.NUMERIC:
                 # call quantitative answer parser
                 pass
-            elif question.question_type == QuestionType.TEXT:
+            elif question.question_type == QuestionType.MULTICHOICE:
                 # call textual question answer parser
                 pass
-            elif question.question_type == QuestionType.GRAPH:
+            elif question.question_type == QuestionType.QUANTITY:
+                # call visual question answer parser
+                pass
+            elif question.question_type == QuestionType.LIST:
                 # call visual question answer parser
                 pass
             else:

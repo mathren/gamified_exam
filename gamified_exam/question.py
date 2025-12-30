@@ -4,10 +4,12 @@ from enum import Enum
 
 class QuestionType(Enum):
     """ different type of questions"""
-    QUALITATIVE = 0
-    QUANTITATVE = 1
-    TEXT = 2
-    GRAPH = 3
+    TEXT = 0
+    NUMERIC= 1
+    MULTICHOICE = 2
+    QUANTITY = 3
+    LIST = 4
+    GRAPH = 5
 
 
 class Difficulty(Enum):
