@@ -24,7 +24,7 @@ Create with conda or mamba an environment and activate it
 Install with pip the requirements:
 
 #+BEGIN_SRC bash
-pip install . ".[dev]"
+pip install -e ".[dev]"
 #+END_SRC
 
 and verify installation:
