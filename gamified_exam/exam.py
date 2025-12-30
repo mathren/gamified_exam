@@ -187,6 +187,10 @@ class GamifiedExam:
 
             print("updating difficulty...")
             self.update_difficulty()
+
+
+            # bonus for strike? maybe increase max_retry?
+
             question_num += 1
 
         self.show_results()
