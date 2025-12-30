@@ -191,16 +191,16 @@ class GamifiedExam:
 
         print(f"\nFinal Score: {self.score}/{self.max_score} ({percentage:.1f}%)")
 
-        if percentage >= 90:
+        if percentage >= 85:
             print("Grade: A - Excellent! 🌟")
-        elif percentage >= 80:
-            print("Grade: B - Great job! 👏")
         elif percentage >= 70:
+            print("Grade: B - Great job! 👏")
+        elif percentage >= 50:
             print("Grade: C - Good effort! 👍")
-        elif percentage >= 60:
+        elif percentage >= 30:
             print("Grade: D - Keep practicing! 📚")
         else:
-            print("Grade: F - More study needed. 💪")
+            print("Grade: E - More study needed. 💪")
 
         print("\n" + "=" * 60)
 
