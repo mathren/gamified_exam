@@ -3,7 +3,7 @@ import json
 from dataclasses import dataclass
 from typing import List, Tuple
 from .question import QuestionType, Difficulty, Question
-from .grader import TextParser, NumericParser, MultichoiceParser, ListParser, QuantityParser
+from .grader import TextParser, MultichoiceParser, ListParser, QuantityParser
 from enum import Enum
 import sys
 
@@ -19,7 +19,6 @@ class GamifiedExam:
         # Register parsers
         self.parsers: Dict[QuestionType, AnswerParser] = {
             QuestionType.TEXT: TextParser(),
-            QuestionType.NUMERIC: NumericParser(tolerance=tolerance_default),
             QuestionType.MULTICHOICE: MultichoiceParser(),
             QuestionType.QUANTITY: QuantityParser(tolerance=tolerance_default),
             QuestionType.LIST: ListParser(),
@@ -39,7 +38,7 @@ class GamifiedExam:
         """
         try:
             with open(filename, 'r', encoding='utf-8') as f:
-                for line in f:
+                for i, line in enumerate(f):
                     line = line.strip()
                     if not line or line.startswith('#'):
                         # skip comments
@@ -51,7 +50,7 @@ class GamifiedExam:
                         if "debug" in sys.argv:
                             raise ValueError(f"Malformatted question file? (expected 5 parts, got {len(parts)})")
                         else:
-                            print(f"Malformatted question file? (expected 5 parts, got {len(parts)})")
+                            print(f"Malformatted question file? (expected 5 parts, got {len(parts)} on line {i})")
                             continue
 
                     diff, points, question_type, prompt, answer = parts
@@ -68,7 +67,7 @@ class GamifiedExam:
                         if "debug" in sys.argv:
                             raise e
                         else:
-                            print(f"Line {line_num}: Invalid value - {e}")
+                            print(f"Line {i}: Invalid value - {e}")
                         continue
         except FileNotFoundError:
             print(f"Error: File '{filename}' not found.")

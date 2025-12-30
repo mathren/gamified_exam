@@ -4,7 +4,7 @@ import os
 # Add parent directory to path if needed
 sys.path.insert(0, os.path.abspath('..'))
 import gamified_exam as ge
-from gamified_exam.grader import TextParser, NumericParser, MultichoiceParser, ListParser
+from gamified_exam.grader import TextParser, MultichoiceParser, ListParser
 from gamified_exam.question import QuestionType, Difficulty
 import pandas as pd
 import matplotlib.pyplot as plt

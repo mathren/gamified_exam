@@ -2,7 +2,7 @@
 # Stellar Evolution Exam Questions
 # Format: difficulty|points|type|prompt|answer
 # Difficulty levels: BEGINNER, INTERMEDIATE, ADVANCED
-# Question types: text, numeric, multichoice, quantity, list
+# Question types: text, quantity, multichoice, quantity, list
 
 # BEGINNER QUESTIONS - Basic Concepts
 
@@ -14,7 +14,7 @@ BEGINNER|10|text|What force causes a protostar to collapse and form?|Gravity
 BEGINNER|10|text|What is a cloud of gas and dust in space where stars form called?|Nebula
 BEGINNER|10|text|What pressure supports a white dwarf against gravitational collapse?|Electron degeneracy pressure
 BEGINNER|10|text|What is the explosive death of a massive star called?|Supernova
-BEGINNER|10|numeric|What is the approximate Chandrasekhar mass limit in solar masses?|1.4
+BEGINNER|10|quantity|What is the approximate Chandrasekhar mass limit?|1.4 Msun
 BEGINNER|10|text|What stage comes immediately after the main sequence for Sun-like stars?|Red giant
 BEGINNER|10|text|What is the remnant left after a Sun-like star dies?|White dwarf
 BEGINNER|10|text|What fusion process occurs in the core of main sequence stars?|Hydrogen fusion
@@ -49,7 +49,7 @@ ADVANCED|30|text|What physical process converts protons to neutrons during core 
 ADVANCED|30|text|Why does the virial theorem require core heating during gravitational contraction?|Half of gravitational energy heats the core
 ADVANCED|30|quantity|What is the approximate core temperature required to fuse hydrogen?|1e7 K
 ADVANCED|30|text|What causes the steep mass-luminosity relation on the main sequence?|Higher core temperature and pressure in massive stars
-ADVANCED|30|numeric|What is the approximate mass-luminosity relation exponent for main sequence stars?|3.5
+ADVANCED|30|quantity|What is the approximate mass-luminosity relation exponent for main sequence stars?|3.5
 ADVANCED|30|quantity|What mass separates stars that become white dwarfs from those that explode?|8 Msun
 ADVANCED|30|text|What process makes Type Ia supernovae useful as standard candles?|Nearly uniform peak luminosity
 ADVANCED|30|text|Why can iron not provide energy through nuclear fusion?|Iron has the highest binding energy per nucleon
