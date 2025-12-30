@@ -1,0 +1,231 @@
+import difflib
+import json
+from dataclasses import dataclass
+from typing import List, Tuple
+from enum import Enum
+
+class Difficulty(Enum):
+    BEGINNER = 1
+    INTERMEDIATE = 2
+    ADVANCED = 3
+
+@dataclass
+class Question:
+    prompt: str
+    answer: str
+    difficulty: Difficulty
+    points: int
+
+class LanguageExam:
+    def __init__(self, answers_file: str):
+        """Initialize exam with answers from a text file."""
+        self.questions = []
+        self.current_difficulty = Difficulty.BEGINNER
+        self.score = 0
+        self.max_score = 0
+        self.correct_streak = 0
+        self.load_questions(answers_file)
+
+    def load_questions(self, filename: str):
+        """Load questions from text file.
+
+        Format per line: difficulty|points|prompt|answer
+        Example: BEGINNER|10|Translate: Hello|Hola
+        """
+        try:
+            with open(filename, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith('#'):
+                        continue
+
+                    parts = line.split('|')
+                    if len(parts) != 4:
+                        continue
+
+                    diff_str, points_str, prompt, answer = parts
+                    difficulty = Difficulty[diff_str.strip().upper()]
+                    points = int(points_str.strip())
+
+                    self.questions.append(Question(
+                        prompt=prompt.strip(),
+                        answer=answer.strip(),
+                        difficulty=difficulty,
+                        points=points
+                    ))
+        except FileNotFoundError:
+            print(f"Error: File '{filename}' not found.")
+            print("Creating sample questions file...")
+            self.create_sample_file(filename)
+            self.load_questions(filename)
+
+    def create_sample_file(self, filename: str):
+        """Create a sample questions file."""
+        sample_data = [
+            "BEGINNER|10|Translate to Spanish: Hello|Hola",
+            "BEGINNER|10|Translate to Spanish: Goodbye|Adiós",
+            "BEGINNER|10|Translate to Spanish: Thank you|Gracias",
+            "INTERMEDIATE|20|Translate to Spanish: How are you?|¿Cómo estás?",
+            "INTERMEDIATE|20|Translate to Spanish: I am fine|Estoy bien",
+            "INTERMEDIATE|20|Translate to Spanish: Good morning|Buenos días",
+            "ADVANCED|30|Translate to Spanish: Where is the library?|¿Dónde está la biblioteca?",
+            "ADVANCED|30|Translate to Spanish: I would like a coffee|Me gustaría un café",
+            "ADVANCED|30|Translate to Spanish: Can you help me?|¿Puedes ayudarme?",
+        ]
+
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write("# Language Exam Questions\n")
+            f.write("# Format: difficulty|points|prompt|answer\n")
+            f.write("# Difficulty levels: BEGINNER, INTERMEDIATE, ADVANCED\n\n")
+            for line in sample_data:
+                f.write(line + '\n')
+
+    def calculate_similarity(self, user_answer: str, correct_answer: str) -> float:
+        """Calculate similarity ratio between answers."""
+        user_norm = user_answer.lower().strip()
+        correct_norm = correct_answer.lower().strip()
+        return difflib.SequenceMatcher(None, user_norm, correct_norm).ratio()
+
+    def auto_correct(self, user_answer: str, correct_answer: str) -> Tuple[bool, float, str]:
+        """Auto-correct with partial credit.
+
+        Returns: (is_acceptable, score_multiplier, feedback)
+        """
+        similarity = self.calculate_similarity(user_answer, correct_answer)
+
+        if similarity == 1.0:
+            return True, 1.0, "Perfect! ✓"
+        elif similarity >= 0.9:
+            return True, 0.9, "Almost perfect! Minor typo detected. (90% points)"
+        elif similarity >= 0.75:
+            return True, 0.7, "Good! Some errors detected. (70% points)"
+        elif similarity >= 0.6:
+            return True, 0.5, "Acceptable, but many errors. (50% points)"
+        else:
+            suggestions = difflib.get_close_matches(
+                user_answer.lower(),
+                [correct_answer.lower()],
+                n=1,
+                cutoff=0.5
+            )
+            feedback = f"Incorrect. ✗ Correct answer: {correct_answer}"
+            return False, 0.0, feedback
+
+    def update_difficulty(self):
+        """Update difficulty based on performance."""
+        if self.correct_streak >= 3 and self.current_difficulty != Difficulty.ADVANCED:
+            if self.current_difficulty == Difficulty.BEGINNER:
+                self.current_difficulty = Difficulty.INTERMEDIATE
+                print("\n🎉 Level up! Moving to INTERMEDIATE difficulty!")
+            elif self.current_difficulty == Difficulty.INTERMEDIATE:
+                self.current_difficulty = Difficulty.ADVANCED
+                print("\n🎉 Level up! Moving to ADVANCED difficulty!")
+            self.correct_streak = 0
+        elif self.correct_streak <= -2 and self.current_difficulty != Difficulty.BEGINNER:
+            if self.current_difficulty == Difficulty.ADVANCED:
+                self.current_difficulty = Difficulty.INTERMEDIATE
+                print("\n📉 Moving to INTERMEDIATE difficulty for practice.")
+            elif self.current_difficulty == Difficulty.INTERMEDIATE:
+                self.current_difficulty = Difficulty.BEGINNER
+                print("\n📉 Moving to BEGINNER difficulty for practice.")
+            self.correct_streak = 0
+
+    def get_questions_by_difficulty(self, difficulty: Difficulty) -> List[Question]:
+        """Get all questions of a specific difficulty."""
+        return [q for q in self.questions if q.difficulty == difficulty]
+
+    def run_exam(self):
+        """Run the interactive exam."""
+        print("=" * 60)
+        print("DUOLINGO-STYLE LANGUAGE EXAM")
+        print("=" * 60)
+        print("\nInstructions:")
+        print("- Answer each question as accurately as possible")
+        print("- Minor typos will receive partial credit")
+        print("- Difficulty increases with correct streaks")
+        print("- Type 'quit' to exit early\n")
+
+        question_pool = self.questions.copy()
+        question_num = 1
+
+        while question_pool:
+            # Filter questions by current difficulty
+            available = [q for q in question_pool if q.difficulty == self.current_difficulty]
+
+            # If no questions at current difficulty, adjust
+            if not available:
+                if self.current_difficulty == Difficulty.ADVANCED:
+                    self.current_difficulty = Difficulty.INTERMEDIATE
+                elif self.current_difficulty == Difficulty.INTERMEDIATE:
+                    self.current_difficulty = Difficulty.BEGINNER
+                else:
+                    break
+                continue
+
+            # Select next question
+            question = available[0]
+            question_pool.remove(question)
+
+            # Display question
+            print(f"\n[Question {question_num}] [{question.difficulty.name}] ({question.points} points)")
+            print(f"{question.prompt}")
+
+            user_answer = input("Your answer: ").strip()
+
+            if user_answer.lower() == 'quit':
+                print("\nExiting exam early...")
+                break
+
+            # Check answer with auto-correct
+            is_correct, multiplier, feedback = self.auto_correct(user_answer, question.answer)
+
+            earned_points = int(question.points * multiplier)
+            self.max_score += question.points
+
+            if is_correct:
+                self.score += earned_points
+                self.correct_streak += 1
+                print(f"✓ {feedback}")
+                print(f"  +{earned_points} points")
+            else:
+                self.correct_streak -= 1
+                print(f"✗ {feedback}")
+                print(f"  +0 points")
+
+            # Update difficulty based on streak
+            self.update_difficulty()
+
+            question_num += 1
+
+        self.show_results()
+
+    def show_results(self):
+        """Display final results."""
+        print("\n" + "=" * 60)
+        print("EXAM COMPLETE!")
+        print("=" * 60)
+
+        percentage = (self.score / self.max_score * 100) if self.max_score > 0 else 0
+
+        print(f"\nFinal Score: {self.score}/{self.max_score} ({percentage:.1f}%)")
+
+        if percentage >= 90:
+            print("Grade: A - Excellent! 🌟")
+        elif percentage >= 80:
+            print("Grade: B - Great job! 👏")
+        elif percentage >= 70:
+            print("Grade: C - Good effort! 👍")
+        elif percentage >= 60:
+            print("Grade: D - Keep practicing! 📚")
+        else:
+            print("Grade: F - More study needed. 💪")
+
+        print("\n" + "=" * 60)
+
+def main():
+    """Main entry point."""
+    exam = LanguageExam('exam_questions.txt')
+    exam.run_exam()
+
+if __name__ == "__main__":
+    main()

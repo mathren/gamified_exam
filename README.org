@@ -1,0 +1,6 @@
+#+Title: Prototype duolinguo-style exam
+#+author: [[mailto:mrenzo@arizona.edu][Mathieu Renzo]]
+
+Prototyped with Claude Sonnet 4.5
+
+Answers are auto-generated and may be incorrect.
