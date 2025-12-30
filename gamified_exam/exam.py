@@ -3,7 +3,7 @@ import json
 from dataclasses import dataclass
 from typing import List, Tuple
 from .question import QuestionType, Difficulty, Question
-from .grader import Grader, TextParser, NumericParser, MultichoiceParser, ListParser
+from .grader import TextParser, NumericParser, MultichoiceParser, ListParser
 from enum import Enum
 import sys
 
