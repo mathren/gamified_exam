@@ -30,5 +30,5 @@ pip install . ".[dev]"
 and verify installation:
 
 #+BEGIN_SRC bash
-  python -c "import gamified_exam; print(gamified_exam.__version__)"
+python -c "from gamified_exam import GamifiedExam; print('Success!')"
 #+END_SRC

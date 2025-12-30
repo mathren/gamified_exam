@@ -1,6 +1,7 @@
 import difflib
 from typing import Tuple
 
+
 class AutoGrader:
     """Handles auto-correction and scoring of answers."""
 

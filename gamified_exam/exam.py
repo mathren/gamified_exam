@@ -2,22 +2,9 @@ import difflib
 import json
 from dataclasses import dataclass
 from typing import List, Tuple
+from .question import Question, Difficulty
 from enum import Enum
 import sys
-
-
-class Difficulty(Enum):
-    BEGINNER = 1
-    INTERMEDIATE = 2
-    ADVANCED = 3
-
-
-@dataclass
-class Question:
-    prompt: str
-    answer: str
-    difficulty: Difficulty
-    points: int
 
 
 class GamifiedExam:
