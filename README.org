@@ -6,15 +6,24 @@ Prototyped with Claude Sonnet 4.5
 Answers are auto-generated for playground and may be incorrect. Aims
 at being platform agnostic
 
-* TODO features to be implemented
-- [ ] parser for answers: could depend on astropy with an =environment.txt=
+* TODO Features to be implemented
+- [ ] parser for text answers
+- [ ] parser for qualitative answers
+- [ ] parser for quantitative answers
+- [ ] parser for graphics based answers
 - [ ] make some answer quiz-style with multiple answers
-- [ ] image-based question
-- [ ] LLM-parsed text answers?
+- [ ] unit tests
+- [ ] *possible enhancement*: LLM-parsed text answers?
 
 * Development
 
-Create with conda or mamba an environment and activate it
+Clone this repo and get into it:
+
+#+BEGIN_SRC bash
+  git clone git@github.com:mathren/gamified_exam.git && cd gamified_exam
+#+END_SRC
+
+Create with conda or mamba an environment and activate it:
 
 #+BEGIN_SRC bash
   conda env create --name gamified_exam -f requirements.txt
@@ -32,3 +41,6 @@ and verify installation:
 #+BEGIN_SRC bash
 python -c "from gamified_exam import GamifiedExam; print('Success!')"
 #+END_SRC
+
+You can use =notebooks/dev.ipynb= to load functions and experiment with
+them, or run =python exam.py= in your terminal for the full test run.
