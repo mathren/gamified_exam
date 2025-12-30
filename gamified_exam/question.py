@@ -5,11 +5,10 @@ from enum import Enum
 class QuestionType(Enum):
     """ different type of questions"""
     TEXT = 0
-    NUMERIC= 1
+    QUANTITY = 1
     MULTICHOICE = 2
-    QUANTITY = 3
-    LIST = 4
-    GRAPH = 5
+    LIST = 3
+    GRAPH = 4
 
 
 class Difficulty(Enum):

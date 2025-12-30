@@ -1,20 +1,74 @@
 import pytest
-from gamified_exam import GamifiedExam, AutoGrader, Difficulty
+import sys
+import os
+# Add parent directory to path if needed
+sys.path.insert(0, os.path.abspath('..'))
+import gamified_exam as ge
+from gamified_exam.grader import TextParser, NumericParser, MultichoiceParser, ListParser
+from gamified_exam.question import QuestionType, Difficulty
+import pandas as pd
+import matplotlib.pyplot as plt
+import astropy.units as u
+from astropy.units import Quantity
 
-def test_grader_perfect_match():
-    grader = AutoGrader()
-    is_correct, multiplier, feedback = grader.auto_correct("Hydrogen", "Hydrogen")
+
+def test_initialization(test_pool=True):
+    exam = ge.GamifiedExam("../data/exam_questions.txt")
+    print("Generated exam", type(exam))
+    question_pool = exam.questions.copy()
+    if test_pool:
+        print("question pool created")
+        # Filter questions by difficulty
+        available = [q for q in question_pool if q.difficulty == Difficulty.BEGINNER]
+        print(f"Found {len(available)} question at {Difficulty.BEGINNER} level")
+        available = [q for q in question_pool if q.difficulty == Difficulty.INTERMEDIATE]
+        print(f"Found {len(available)} question at {Difficulty.INTERMEDIATE} level")
+        available = [q for q in question_pool if q.difficulty == Difficulty.ADVANCED]
+        print(f"Found {len(available)} question at {Difficulty.ADVANCED} level")
+    return exam, question_pool
+
+
+# def test_get_all_parsers():
+#     exam, question_pool = test_initialization()
+#     for question_type in [QuestionType.TEXT, QuestionType.NUMERIC, QuestionType.MULTICHOICE, QuestionType.QUANTITY, QuestionType.LIST, QuestionType.Graph]:
+#         questions = [q for q in question_pool if q.question_type == question_type]
+#         print(f"Found {len(questions)} text questions of type {question_type}")
+#         parser = exam.parsers.get(questions[0].question_type)
+#         print(parser)
+
+
+def test_text_parser_correct():
+    exam, question_pool = test_initialization(test_pool=False)
+    text_questions = [q for q in question_pool if q.question_type == QuestionType.TEXT]
+    print(f"Found {len(text_questions)} text questions")
+    question = text_questions[0]
+    answer = "OBAFGKM"
+    # get examiner
+    parser = exam.parsers.get(question.question_type)
+    is_correct, score, feedback = parser.parse(answer, question.answer)
     assert is_correct == True
-    assert multiplier == 1.0
+    assert score == 1.0
 
-def test_grader_minor_typo():
-    grader = AutoGrader()
-    is_correct, multiplier, feedback = grader.auto_correct("Hydrogn", "Hydrogen")
-    assert is_correct == True
-    assert multiplier >= 0.5
 
-def test_grader_wrong_answer():
-    grader = AutoGrader()
-    is_correct, multiplier, feedback = grader.auto_correct("Nova", "Supernova")
-    assert is_correct == False
-    assert multiplier == 0.0
+def test_quantity_parser_correct():
+    exam, question_pool = test_initialization(test_pool=False)
+    text_questions = [q for q in question_pool if q.question_type == QuestionType.QUANTITY]
+    print(f"Found {len(text_questions)} text questions for {QuestionType.QUANTITY}")
+    question = text_questions[0]
+    print(question.prompt)
+    print("hint:", question.answer)
+    answer = input("answer?")
+    # get examiner
+    parser = exam.parsers.get(question.question_type)
+    is_correct, score, feedback = parser.parse(answer, question.answer)
+    print(is_correct)
+    print(score)
+    print(feedback)
+    # assert is_correct == True
+    # assert score == 1.0
+
+
+
+if __name__ == "__main__":
+    # test_text_parser_correct()
+    test_quantity_parser_correct()

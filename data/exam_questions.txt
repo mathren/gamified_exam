@@ -6,6 +6,7 @@
 
 # BEGINNER QUESTIONS - Basic Concepts
 
+BEGINNER|10|text|What are the spectral classes of stars from hottest to coldest?|OBAFGKM
 BEGINNER|10|text|What is the primary fuel for nuclear fusion in main sequence stars?|Hydrogen
 BEGINNER|10|text|What type of star is the Sun classified as?|Main sequence star
 BEGINNER|10|multichoice|What color are the coolest stars? (A) Blue (B) White (C) Yellow (D) Red|D

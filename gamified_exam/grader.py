@@ -19,7 +19,7 @@ class AnswerParser(ABC):
 
 
 class TextParser(AnswerParser):
-    """Parser for text-based answers with fuzzy matching."""
+    """Parser for text-based answers with fuzzy matching: case insensitive and space insensitive"""
 
     def parse(self, user_answer: str, correct_answer: str) -> Tuple[bool, float, str]:
         user_norm = user_answer.lower().strip()
@@ -38,35 +38,35 @@ class TextParser(AnswerParser):
             return False, 0.0, f"Incorrect. ✗ Correct answer: {correct_answer}"
 
 
-class NumericParser(AnswerParser):
-    """Parser for numeric answers with tolerance."""
+# class NumericParser(AnswerParser):
+#     """Parser for numeric answers with tolerance."""
 
-    def __init__(self, tolerance=5.0):
-        self.tolerance = tolerance
+#     def __init__(self, tolerance=0.05):
+#         self.tolerance = tolerance
 
-    def parse(self, user_answer: str, correct_answer: str) -> Tuple[bool, float, str]:
-        try:
-            # Extract numbers from strings
-            user_num = float(re.findall(r'-?\d+\.?\d*', user_answer)[0])
-            correct_num = float(re.findall(r'-?\d+\.?\d*', correct_answer)[0])
+#     def parse(self, user_answer: str, correct_answer: str) -> Tuple[bool, float, str]:
+#         try:
+#             # Extract numbers from strings
+#             user_num = float(re.findall(r'-?\d+\.?\d*', user_answer)[0])
+#             correct_num = float(re.findall(r'-?\d+\.?\d*', correct_answer)[0])
 
-            # Calculate percentage difference
-            if correct_num == 0:
-                diff_percent = 100 if user_num != 0 else 0
-            else:
-                diff_percent = abs((user_num - correct_num) / correct_num * 100)
+#             # Calculate percentage difference
+#             if correct_num == 0:
+#                 diff_percent = 100 if user_num != 0 else 0
+#             else:
+#                 diff_percent = abs((user_num - correct_num) / correct_num * 100)
 
-            if diff_percent == 0:
-                return True, 1.0, "Perfect! ✓"
-            elif diff_percent <= self.tolerance:
-                score = 1.0 - (diff_percent / self.tolerance) * 0.2  # Max 20% penalty
-                return True, score, f"Close! Within {diff_percent:.1f}% ({score*100:.0f}% points)"
-            elif diff_percent <= self.tolerance * 2:
-                return True, 0.6, f"Acceptable range. ({diff_percent:.1f}% off, 60% points)"
-            else:
-                return False, 0.0, f"Incorrect. ✗ Correct answer: {correct_answer} (you were {diff_percent:.1f}% off)"
-        except (IndexError, ValueError):
-            return False, 0.0, f"Invalid numeric format. ✗ Correct answer: {correct_answer}"
+#             if diff_percent == 0:
+#                 return True, 1.0, "Perfect! ✓"
+#             elif diff_percent <= self.tolerance:
+#                 score = 1.0 - (diff_percent / self.tolerance) * 0.2  # Max 20% penalty
+#                 return True, score, f"Close! Within {diff_percent:.1f}% ({score*100:.0f}% points)"
+#             elif diff_percent <= self.tolerance * 2:
+#                 return True, 0.6, f"Acceptable range. ({diff_percent:.1f}% off, 60% points)"
+#             else:
+#                 return False, 0.0, f"Incorrect. ✗ Correct answer: {correct_answer} (you were {diff_percent:.1f}% off)"
+#         except (IndexError, ValueError):
+#             return False, 0.0, f"Invalid numeric format. ✗ Correct answer: {correct_answer}"
 
 
 class MultichoiceParser(AnswerParser):
@@ -88,10 +88,42 @@ class MultichoiceParser(AnswerParser):
             return False, 0.0, f"Incorrect. ✗ Correct answer: {correct_answer}"
 
 
+
+class ListParser(AnswerParser):
+    """Parser for list answers (comma-separated, order doesn't matter)."""
+
+    def parse(self, user_answer: str, correct_answer: str) -> Tuple[bool, float, str]:
+        # Split by comma and normalize
+        user_items = set(item.strip().lower() for item in user_answer.split(','))
+        correct_items = set(item.strip().lower() for item in correct_answer.split(','))
+
+        if user_items == correct_items:
+            return True, 1.0, "Perfect! All items correct. ✓"
+
+        # Calculate partial credit
+        correct_count = len(user_items & correct_items)
+        total_count = len(correct_items)
+
+        if correct_count == 0:
+            return False, 0.0, f"Incorrect. ✗ Correct answer: {correct_answer}"
+
+        score = correct_count / total_count
+        missing = correct_items - user_items
+        extra = user_items - correct_items
+
+        feedback = f"Partial credit: {correct_count}/{total_count} correct ({score*100:.0f}% points)"
+        if missing:
+            feedback += f"\nMissing: {', '.join(missing)}"
+        if extra:
+            feedback += f"\nExtra/incorrect: {', '.join(extra)}"
+
+        return True, score, feedback
+
+
 class QuantityParser(AnswerParser):
     """Parser for quantities with units using astropy.units for proper unit handling."""
 
-    def __init__(self, tolerance=5.0):
+    def __init__(self, tolerance=0.05):
         self.tolerance = tolerance
 
 
@@ -99,7 +131,6 @@ class QuantityParser(AnswerParser):
         try:
             return self._parse_with_astropy(user_answer, correct_answer)
         except:
-            print("using parser fallback")
             return self._parse_fallback(user_answer, correct_answer)
 
     def _parse_with_astropy(self, user_answer: str, correct_answer: str) -> Tuple[bool, float, str]:
@@ -200,6 +231,7 @@ class QuantityParser(AnswerParser):
 
     def _parse_fallback(self, user_answer: str, correct_answer: str) -> Tuple[bool, float, str]:
         """Fallback parser when astropy is not available."""
+        print("Astropy fail? Trying fallback parser with regex")
         try:
             user_match = re.match(r'(-?\d+\.?\d*(?:[eE][+-]?\d+)?)\s*(.+)', user_answer.strip())
             correct_match = re.match(r'(-?\d+\.?\d*(?:[eE][+-]?\d+)?)\s*(.+)', correct_answer.strip())
@@ -234,34 +266,3 @@ class QuantityParser(AnswerParser):
                 return False, 0.0, f"Incorrect. ✗ Correct answer: {correct_answer}"
         except (AttributeError, ValueError, IndexError):
             return False, 0.0, f"Invalid format. ✗ Correct answer: {correct_answer}"
-
-
-class ListParser(AnswerParser):
-    """Parser for list answers (comma-separated, order doesn't matter)."""
-
-    def parse(self, user_answer: str, correct_answer: str) -> Tuple[bool, float, str]:
-        # Split by comma and normalize
-        user_items = set(item.strip().lower() for item in user_answer.split(','))
-        correct_items = set(item.strip().lower() for item in correct_answer.split(','))
-
-        if user_items == correct_items:
-            return True, 1.0, "Perfect! All items correct. ✓"
-
-        # Calculate partial credit
-        correct_count = len(user_items & correct_items)
-        total_count = len(correct_items)
-
-        if correct_count == 0:
-            return False, 0.0, f"Incorrect. ✗ Correct answer: {correct_answer}"
-
-        score = correct_count / total_count
-        missing = correct_items - user_items
-        extra = user_items - correct_items
-
-        feedback = f"Partial credit: {correct_count}/{total_count} correct ({score*100:.0f}% points)"
-        if missing:
-            feedback += f"\nMissing: {', '.join(missing)}"
-        if extra:
-            feedback += f"\nExtra/incorrect: {', '.join(extra)}"
-
-        return True, score, feedback
