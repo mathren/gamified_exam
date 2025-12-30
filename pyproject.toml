@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gamified-exam"
+version = "0.1.0"
+description = "A Duolingo-style exam system for stellar evolution"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "GPLv3"}
+
+[project.optional-dependencies]
+dev = ["jupyter", "notebook", "ipywidgets", "matplotlib", "pandas", "pytest", "numpy"]

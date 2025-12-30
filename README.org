@@ -11,3 +11,24 @@ at being platform agnostic
 - [ ] make some answer quiz-style with multiple answers
 - [ ] image-based question
 - [ ] LLM-parsed text answers?
+
+* Development
+
+Create with conda or mamba an environment and activate it
+
+#+BEGIN_SRC bash
+  conda env create --name gamified_exam -f requirements.txt
+  conda activate gamified_exam
+#+END_SRC
+
+Install with pip the requirements:
+
+#+BEGIN_SRC bash
+pip install . ".[dev]"
+#+END_SRC
+
+and verify installation:
+
+#+BEGIN_SRC bash
+  python -c "import gamified_exam; print(gamified_exam.__version__)"
+#+END_SRC

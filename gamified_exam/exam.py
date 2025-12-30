@@ -5,6 +5,7 @@ from typing import List, Tuple
 from enum import Enum
 import sys
 
+
 class Difficulty(Enum):
     BEGINNER = 1
     INTERMEDIATE = 2
@@ -91,6 +92,8 @@ class GamifiedExam:
             for line in sample_data:
                 f.write(line + '\n')
 
+
+
     def calculate_similarity(self, user_answer: str, correct_answer: str) -> float:
         """Calculate similarity ratio between answers.
         TODO: make this a proper parser checking quantities with units using astropy
@@ -98,6 +101,7 @@ class GamifiedExam:
         user_norm = user_answer.lower().strip()
         correct_norm = correct_answer.lower().strip()
         return difflib.SequenceMatcher(None, user_norm, correct_norm).ratio()
+
 
     def auto_correct(self, user_answer: str, correct_answer: str) -> Tuple[bool, float, str]:
         """Auto-correct with partial credit.
@@ -124,6 +128,7 @@ class GamifiedExam:
             feedback = f"Incorrect. ✗ Correct answer: {correct_answer}"
             return False, 0.0, feedback
 
+
     def update_difficulty(self):
         """Update difficulty based on performance."""
         if self.correct_streak >= 3 and self.current_difficulty != Difficulty.ADVANCED:
@@ -143,9 +148,11 @@ class GamifiedExam:
                 print("\n📉 Moving to BEGINNER difficulty for practice.")
             self.correct_streak = 0
 
+
     def get_questions_by_difficulty(self, difficulty: Difficulty) -> List[Question]:
         """Get all questions of a specific difficulty."""
         return [q for q in self.questions if q.difficulty == difficulty]
+
 
     def run_exam(self):
         """Run the interactive exam."""
@@ -211,6 +218,7 @@ class GamifiedExam:
             question_num += 1
 
         self.show_results()
+
 
     def show_results(self):
         """Display final results."""

@@ -1,0 +1,11 @@
+# Core dependencies (minimal for the package itself)
+
+# Development dependencies
+jupyter>=1.0.0
+notebook>=6.4.0
+ipywidgets>=7.6.0
+matplotlib>=3.3.0
+pandas>=1.2.0
+pytest>=6.2.0
+numpy>=2.4.0
+astropy>=7.2.0
