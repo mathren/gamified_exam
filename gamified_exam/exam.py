@@ -136,11 +136,10 @@ class GamifiedExam:
                 # call visual question answer parser
                 pass
             else:
+                # Check answer with auto-correct
+                is_correct, multiplier, feedback = Grader.auto_correct(user_answer, question.answer)
                 raise ValueError("QuestionType is unrecognized:", question.question_type)
 
-
-            # Check answer with auto-correct
-            is_correct, multiplier, feedback = Grader.auto_correct(user_answer, question.answer)
 
             earned_points = int(question.points * multiplier)
             self.max_score += question.points
