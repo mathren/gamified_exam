@@ -15,6 +15,7 @@ class AutoGrader:
     @staticmethod
     def auto_correct(user_answer: str, correct_answer: str) -> Tuple[bool, float, str]:
         """Auto-correct with partial credit.
+        TODO: trigger for minor errors
 
         Returns: (is_acceptable, score_multiplier, feedback)
         """
