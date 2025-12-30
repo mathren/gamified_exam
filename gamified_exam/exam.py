@@ -2,7 +2,8 @@ import difflib
 import json
 from dataclasses import dataclass
 from typing import List, Tuple
-from .question import Question, Difficulty, QuestionType
+from .question import QuestionType, Difficulty, Question
+from .grader import Grader
 from enum import Enum
 import sys
 
@@ -51,42 +52,6 @@ class GamifiedExam:
                     ))
         except FileNotFoundError:
             print(f"Error: File '{filename}' not found.")
-
-
-
-    def calculate_similarity(self, user_answer: str, correct_answer: str) -> float:
-        """Calculate similarity ratio between answers.
-        TODO: make this a proper parser checking quantities with units using astropy
-        """
-        user_norm = user_answer.lower().strip()
-        correct_norm = correct_answer.lower().strip()
-        return difflib.SequenceMatcher(None, user_norm, correct_norm).ratio()
-
-
-    def auto_correct(self, user_answer: str, correct_answer: str) -> Tuple[bool, float, str]:
-        """Auto-correct with partial credit.
-
-        Returns: (is_acceptable, score_multiplier, feedback)
-        """
-        similarity = self.calculate_similarity(user_answer, correct_answer)
-
-        if similarity == 1.0:
-            return True, 1.0, "Perfect! ✓"
-        elif similarity >= 0.9:
-            return True, 0.9, "Almost perfect! Minor typo detected. (90% points)"
-        elif similarity >= 0.75:
-            return True, 0.7, "Good! Some errors detected. (70% points)"
-        elif similarity >= 0.6:
-            return True, 0.5, "Acceptable, but many errors. (50% points)"
-        else:
-            suggestions = difflib.get_close_matches(
-                user_answer.lower(),
-                [correct_answer.lower()],
-                n=1,
-                cutoff=0.5
-            )
-            feedback = f"Incorrect. ✗ Correct answer: {correct_answer}"
-            return False, 0.0, feedback
 
 
     def update_difficulty(self):
@@ -139,6 +104,7 @@ class GamifiedExam:
                 elif self.current_difficulty == Difficulty.INTERMEDIATE:
                     self.current_difficulty = Difficulty.BEGINNER
                 else:
+                    print("Run out of questions!")
                     break
                 continue
 
@@ -156,8 +122,25 @@ class GamifiedExam:
                 print("\nExiting exam early...")
                 break
 
+            # check question type
+            if question.question_type == QuestionType.QUALITATIVE:
+                # call qualitative answer parser
+                pass
+            elif question.question_type == QuestionType.QUANTITATIVE:
+                # call quantitative answer parser
+                pass
+            elif question.question_type == QuestionType.TEXT:
+                # call textual question answer parser
+                pass
+            elif question.question_type == QuestionType.GRAPH:
+                # call visual question answer parser
+                pass
+            else:
+                raise ValueError("QuestionType is unrecognized:", question.question_type)
+
+
             # Check answer with auto-correct
-            is_correct, multiplier, feedback = self.auto_correct(user_answer, question.answer)
+            is_correct, multiplier, feedback = Grader.auto_correct(user_answer, question.answer)
 
             earned_points = int(question.points * multiplier)
             self.max_score += question.points
@@ -205,11 +188,7 @@ class GamifiedExam:
         print("\n" + "=" * 60)
 
 
-def main():
-    """Main entry point."""
-    exam = GamifiedExam('exam_questions.txt')
-    exam.run_exam()
-
 
 if __name__ == "__main__":
-    main()
+    exam = GamifiedExam('exam_questions.txt')
+    exam.run_exam()

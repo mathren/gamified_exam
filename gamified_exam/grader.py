@@ -2,7 +2,7 @@ import difflib
 from typing import Tuple
 
 
-class AutoGrader:
+class Grader:
     """Handles auto-correction and scoring of answers."""
 
     @staticmethod
@@ -19,7 +19,7 @@ class AutoGrader:
 
         Returns: (is_acceptable, score_multiplier, feedback)
         """
-        similarity = AutoGrader.calculate_similarity(user_answer, correct_answer)
+        similarity = Grader.calculate_similarity(user_answer, correct_answer)
 
         if similarity == 1.0:
             return True, 1.0, "Perfect! ✓"

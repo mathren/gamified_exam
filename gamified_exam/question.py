@@ -9,6 +9,7 @@ class QuestionType(Enum):
     TEXT = 2
     GRAPH = 3
 
+
 class Difficulty(Enum):
     BEGINNER = 1
     INTERMEDIATE = 2
