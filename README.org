@@ -3,4 +3,11 @@
 
 Prototyped with Claude Sonnet 4.5
 
-Answers are auto-generated and may be incorrect.
+Answers are auto-generated for playground and may be incorrect. Aims
+at being platform agnostic
+
+* TODO features to be implemented
+- [ ] parser for answers: could depend on astropy with an =environment.txt=
+- [ ] make some answer quiz-style with multiple answers
+- [ ] image-based question
+- [ ] LLM-parsed text answers?
