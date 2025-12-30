@@ -13,6 +13,7 @@ at being platform agnostic
 - [ ] parser for graphics based answers
 - [ ] make some answer quiz-style with multiple answers
 - [ ] unit tests
+- [ ] allow for question-specific tolerance
 - [ ] *possible enhancement*: LLM-parsed text answers?
 
 * Development

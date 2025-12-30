@@ -3,29 +3,28 @@ import json
 from dataclasses import dataclass
 from typing import List, Tuple
 from .question import QuestionType, Difficulty, Question
-from .grader import TextParser, NumericParser, MultichoiceParser, ListParser
+from .grader import TextParser, NumericParser, MultichoiceParser, ListParser, QuantityParser
 from enum import Enum
 import sys
 
 
 class GamifiedExam:
-    def __init__(self, answers_file: str, tolerance=0.05):
+    def __init__(self, answers_file: str, tolerance_default=0.05):
         """Initialize exam with answers from a text file."""
         self.questions = []
         self.current_difficulty = Difficulty.BEGINNER
         self.score = 0
         self.max_score = 0
         self.correct_streak = 0
-        self.load_questions(answers_file)
         # Register parsers
         self.parsers: Dict[QuestionType, AnswerParser] = {
             QuestionType.TEXT: TextParser(),
-            QuestionType.NUMERIC: NumericParser(tolerance=tolerance),
-            QuestionType.MULTIPLE_CHOICE: MultiplechoiceParser(),
-            QuestionType.QUANTITY: QuantityParser(tolerance=tolerance),
+            QuestionType.NUMERIC: NumericParser(tolerance=tolerance_default),
+            QuestionType.MULTICHOICE: MultichoiceParser(),
+            QuestionType.QUANTITY: QuantityParser(tolerance=tolerance_default),
             QuestionType.LIST: ListParser(),
         }
-
+        self.load_questions(answers_file)
 
     def register_parser(self, question_type: QuestionType, parser: AnswerParser):
         """Register a custom parser for a question type."""

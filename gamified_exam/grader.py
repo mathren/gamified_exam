@@ -41,8 +41,8 @@ class TextParser(AnswerParser):
 class NumericParser(AnswerParser):
     """Parser for numeric answers with tolerance."""
 
-    def __init__(self, tolerance_percent=5.0):
-        self.tolerance_percent = tolerance_percent
+    def __init__(self, tolerance=5.0):
+        self.tolerance = tolerance
 
     def parse(self, user_answer: str, correct_answer: str) -> Tuple[bool, float, str]:
         try:
@@ -58,10 +58,10 @@ class NumericParser(AnswerParser):
 
             if diff_percent == 0:
                 return True, 1.0, "Perfect! ✓"
-            elif diff_percent <= self.tolerance_percent:
-                score = 1.0 - (diff_percent / self.tolerance_percent) * 0.2  # Max 20% penalty
+            elif diff_percent <= self.tolerance:
+                score = 1.0 - (diff_percent / self.tolerance) * 0.2  # Max 20% penalty
                 return True, score, f"Close! Within {diff_percent:.1f}% ({score*100:.0f}% points)"
-            elif diff_percent <= self.tolerance_percent * 2:
+            elif diff_percent <= self.tolerance * 2:
                 return True, 0.6, f"Acceptable range. ({diff_percent:.1f}% off, 60% points)"
             else:
                 return False, 0.0, f"Incorrect. ✗ Correct answer: {correct_answer} (you were {diff_percent:.1f}% off)"
@@ -91,14 +91,15 @@ class MultichoiceParser(AnswerParser):
 class QuantityParser(AnswerParser):
     """Parser for quantities with units using astropy.units for proper unit handling."""
 
-    def __init__(self, tolerance_percent=5.0):
-        self.tolerance_percent = tolerance_percent
-        self.use_astropy = ASTROPY_AVAILABLE
+    def __init__(self, tolerance=5.0):
+        self.tolerance = tolerance
+
 
     def parse(self, user_answer: str, correct_answer: str) -> Tuple[bool, float, str]:
-        if self.use_astropy:
+        try:
             return self._parse_with_astropy(user_answer, correct_answer)
-        else:
+        except:
+            print("using parser fallback")
             return self._parse_fallback(user_answer, correct_answer)
 
     def _parse_with_astropy(self, user_answer: str, correct_answer: str) -> Tuple[bool, float, str]:
@@ -132,10 +133,10 @@ class QuantityParser(AnswerParser):
             # Grade based on accuracy
             if diff_percent == 0:
                 return True, 1.0, "Perfect! ✓"
-            elif diff_percent <= self.tolerance_percent:
-                score = 1.0 - (diff_percent / self.tolerance_percent) * 0.2
+            elif diff_percent <= self.tolerance:
+                score = 1.0 - (diff_percent / self.tolerance) * 0.2
                 return True, score, f"Excellent! Within {diff_percent:.1f}% ({score*100:.0f}% points)"
-            elif diff_percent <= self.tolerance_percent * 2:
+            elif diff_percent <= self.tolerance * 2:
                 return True, 0.6, f"Acceptable range. ({diff_percent:.1f}% off, 60% points)"
             else:
                 return False, 0.0, f"Incorrect. ✗ Correct answer: {correct_answer} (you were {diff_percent:.1f}% off)"
@@ -224,10 +225,10 @@ class QuantityParser(AnswerParser):
 
             if diff_percent == 0:
                 return True, 1.0, "Perfect! ✓"
-            elif diff_percent <= self.tolerance_percent:
-                score = 1.0 - (diff_percent / self.tolerance_percent) * 0.2
+            elif diff_percent <= self.tolerance:
+                score = 1.0 - (diff_percent / self.tolerance) * 0.2
                 return True, score, f"Close! Within {diff_percent:.1f}% ({score*100:.0f}% points)"
-            elif diff_percent <= self.tolerance_percent * 2:
+            elif diff_percent <= self.tolerance * 2:
                 return True, 0.6, f"Acceptable. ({diff_percent:.1f}% off, 60% points)"
             else:
                 return False, 0.0, f"Incorrect. ✗ Correct answer: {correct_answer}"
