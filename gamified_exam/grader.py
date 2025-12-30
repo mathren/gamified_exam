@@ -69,7 +69,6 @@ class QuantityParser(AnswerParser):
             try:
                 user_in_correct_units = user_qty.to(correct_qty.unit)
             except u.UnitConversionError:
-                print("Have you checked the units?")
                 return False, 0.0, f"Incompatible units. ✗ Expected units like: {correct_qty.unit}"
 
             # Calculate percentage difference
@@ -204,7 +203,11 @@ class MultichoiceParser(AnswerParser):
         if user_norm == correct_norm:
             return True, 1.0, "Correct! ✓"
         else:
-            return False, 0.0, f"Incorrect. ✗ Correct answer: {correct_answer}"
+            if user_norm not in ["A", "B", "C", "D"]:
+                # typo?
+                return False, 0.0, f"\"{user_answer}\" is not an option! Try again"
+            else:
+                return False, 0.0, f"Incorrect. ✗ Correct answer: {correct_answer}"
 
 
 

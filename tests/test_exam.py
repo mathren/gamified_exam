@@ -10,7 +10,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import astropy.units as u
 from astropy.units import Quantity
-
+import numpy as np
 
 def test_initialization(test_pool=True):
     exam = ge.GamifiedExam("../data/exam_questions.txt")
@@ -52,13 +52,32 @@ def test_text_parser_correct():
 
 def test_quantity_parser_correct():
     exam, question_pool = test_initialization(test_pool=False)
-    text_questions = [q for q in question_pool if q.question_type == QuestionType.QUANTITY]
-    print(f"Found {len(text_questions)} text questions for {QuestionType.QUANTITY}")
-    question = text_questions[0]
+    questions = [q for q in question_pool if q.question_type == QuestionType.QUANTITY]
+    print(f"Found {len(questions)} text questions for {QuestionType.QUANTITY}")
+    question = questions[0] # np.random.choice(questions)
     print(question.prompt)
     print("hint:", question.answer)
-    answer = input("answer?")
-    # get examiner
+    answer = "1.4 Msun"
+    # answer = input("answer for testing?")
+    parser = exam.parsers.get(question.question_type)
+    is_correct, score, feedback = parser.parse(answer, question.answer)
+    # print(is_correct)
+    # print(score)
+    # print(feedback)
+    assert is_correct == True
+    assert score == 1.0
+
+
+
+def test_multichoice_parser_correct():
+    exam, question_pool = test_initialization(test_pool=False)
+    questions = [q for q in question_pool if q.question_type == QuestionType.MULTICHOICE]
+    print(f"Found {len(questions)} text questions for {QuestionType.MULTICHOICE}")
+    question = np.random.choice(questions)
+    print(question.prompt)
+    print("hint:", question.answer)
+    # answer = "1.4 Msun"
+    answer = input("answer for testing?")
     parser = exam.parsers.get(question.question_type)
     is_correct, score, feedback = parser.parse(answer, question.answer)
     print(is_correct)
@@ -71,4 +90,4 @@ def test_quantity_parser_correct():
 
 if __name__ == "__main__":
     # test_text_parser_correct()
-    test_quantity_parser_correct()
+    test_multichoice_parser_correct()

@@ -106,7 +106,7 @@ class GamifiedExam:
         return [q for q in self.questions if q.difficulty == difficulty]
 
 
-    def run_exam(self):
+    def run_exam(self, max_retry=2, retry_count=0):
         """Run the interactive exam."""
         print("=" * 60)
         print("DUOLINGO-STYLE LANGUAGE EXAM")
@@ -139,17 +139,38 @@ class GamifiedExam:
             question = available[0]
             question_pool.remove(question)  # advances while loop
 
-            # Display question
+                        # Display question
             print(f"\n[Question {question_num}] [{question.difficulty.name}] ({question.points} points)")
             print(f"{question.prompt}")
 
-            user_answer = input("Your answer: ").strip()
 
+            while retry_count <= max_retry:
+                user_answer = input("Your answer: ").strip()
+
+                if user_answer.lower() == 'quit':
+                    print("\nExiting exam early...")
+                    break
+
+                is_correct, multiplier, feedback = self.grade_answer(user_answer, question)
+
+                is_format_error = (
+                    multiplier == 0.0 and
+                    any(err in feedback.lower() for err in ['invalid format', 'incompatible units', 'wrong units', 'try again'])
+                )
+
+                if is_format_error and retry_count < max_retries:
+                    print(f"⚠ {feedback}")
+                    print(f"  Retry {retry_count + 1}/{max_retries} - Try again with correct format/units")
+                    retry_count += 1
+                    continue
+                else:
+                    # Either correct answer, wrong answer, or out of retries
+                    break
+
+            # ADDED: Break check after loop
             if user_answer.lower() == 'quit':
-                print("\nExiting exam early...")
                 break
 
-            is_correct, multiplier, feedback = self.grade_answer(user_answer, question)
 
             earned_points = int(question.points * multiplier)
             self.max_score += question.points
