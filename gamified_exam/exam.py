@@ -3,13 +3,13 @@ import json
 from dataclasses import dataclass
 from typing import List, Tuple
 from .question import QuestionType, Difficulty, Question
-from .grader import Grader
+from .grader import Grader, TextParser, NumericParser, MultichoiceParser, ListParser
 from enum import Enum
 import sys
 
 
 class GamifiedExam:
-    def __init__(self, answers_file: str):
+    def __init__(self, answers_file: str, tolerance=0.05):
         """Initialize exam with answers from a text file."""
         self.questions = []
         self.current_difficulty = Difficulty.BEGINNER
@@ -17,12 +17,26 @@ class GamifiedExam:
         self.max_score = 0
         self.correct_streak = 0
         self.load_questions(answers_file)
+        # Register parsers
+        self.parsers: Dict[QuestionType, AnswerParser] = {
+            QuestionType.TEXT: TextParser(),
+            QuestionType.NUMERIC: NumericParser(tolerance=tolerance),
+            QuestionType.MULTIPLE_CHOICE: MultiplechoiceParser(),
+            QuestionType.QUANTITY: QuantityParser(tolerance=tolerance),
+            QuestionType.LIST: ListParser(),
+        }
+
+
+    def register_parser(self, question_type: QuestionType, parser: AnswerParser):
+        """Register a custom parser for a question type."""
+        self.parsers[question_type] = parser
+
 
     def load_questions(self, filename: str):
         """Load questions from text file.
 
         Format per line: difficulty|points|question_type|prompt|answer, comments with #
-        Example: BEGINNER|10|Translate: Hello|Hola
+        Example: BEGINNER|10|text|Translate: Hello|Hola
         """
         try:
             with open(filename, 'r', encoding='utf-8') as f:
@@ -36,22 +50,37 @@ class GamifiedExam:
                     if len(parts) != 5:
                         print("line with incorrect question formatting found!")
                         if "debug" in sys.argv:
-                            raise ValueError
+                            raise ValueError(f"Malformatted question file? (expected 5 parts, got {len(parts)})")
                         else:
+                            print(f"Malformatted question file? (expected 5 parts, got {len(parts)})")
                             continue
 
                     diff, points, question_type, prompt, answer = parts
 
-                    self.questions.append(Question(
-                        prompt=prompt.strip(),
-                        answer=answer.strip(),
-                        difficulty=Difficulty[diff.strip().upper()],
-                        points=int(points.strip()),
-                        question_type=QuestionType[question_type.strip().upper()]
-
-                    ))
+                    try:
+                        self.questions.append(Question(
+                            prompt=prompt.strip(),
+                            answer=answer.strip(),
+                            difficulty=Difficulty[diff.strip().upper()],
+                            points=int(points.strip()),
+                            question_type=QuestionType[question_type.strip().upper()]
+                        ))
+                    except (KeyError, ValueError) as e:
+                        if "debug" in sys.argv:
+                            raise e
+                        else:
+                            print(f"Line {line_num}: Invalid value - {e}")
+                        continue
         except FileNotFoundError:
             print(f"Error: File '{filename}' not found.")
+
+
+    def grade_answer(self, user_answer: str, question: Question) -> Tuple[bool, float, str]:
+        """Grade an answer using the appropriate parser."""
+        parser = self.parsers.get(question.question_type)
+        if parser is None:
+            return False, 0.0, f"Unknown question type: {question.question_type}"
+        return parser.parse(user_answer, question.answer)
 
 
     def update_difficulty(self):
@@ -122,27 +151,7 @@ class GamifiedExam:
                 print("\nExiting exam early...")
                 break
 
-            # check question type
-            if question.question_type == QuestionType.TEXT:
-                # call qualitative answer parser
-                pass
-            elif question.question_type == QuestionType.NUMERIC:
-                # call quantitative answer parser
-                pass
-            elif question.question_type == QuestionType.MULTICHOICE:
-                # call textual question answer parser
-                pass
-            elif question.question_type == QuestionType.QUANTITY:
-                # call visual question answer parser
-                pass
-            elif question.question_type == QuestionType.LIST:
-                # call visual question answer parser
-                pass
-            else:
-                # Check answer with auto-correct
-                is_correct, multiplier, feedback = Grader.auto_correct(user_answer, question.answer)
-                raise ValueError("QuestionType is unrecognized:", question.question_type)
-
+            is_correct, multiplier, feedback = self.grade_answer(user_answer, question)
 
             earned_points = int(question.points * multiplier)
             self.max_score += question.points
@@ -152,16 +161,58 @@ class GamifiedExam:
                 self.correct_streak += 1
                 print(f"✓ {feedback}")
                 print(f"  +{earned_points} points")
-                print(f" correct streak = {self.correct_streak}")
             else:
                 self.correct_streak -= 1
                 print(f"✗ {feedback}")
                 print(f"  +0 points")
 
-            # Update difficulty based on streak
+            print("updating difficulty...")
             self.update_difficulty()
-
             question_num += 1
+
+        self.show_results()
+
+
+            # # check question type
+            # if question.question_type == QuestionType.TEXT:
+            #     # call qualitative answer parser
+            #     TextParser()
+            # elif question.question_type == QuestionType.NUMERIC:
+            #     # call quantitative answer parser
+            #     print("NUMERIC question")
+            # elif question.question_type == QuestionType.MULTICHOICE:
+            #     # call textual question answer parser
+            #     print("MULTICHOICE question")
+            # elif question.question_type == QuestionType.QUANTITY:
+            #     # call visual question answer parser
+            #     print("QUANTITY question")
+            # elif question.question_type == QuestionType.LIST:
+            #     # call visual question answer parser
+            #     print("LIST question")
+            # else:
+            #     # Check answer with auto-correct
+            #     is_correct, multiplier, feedback = Grader.auto_correct(user_answer, question.answer)
+            #     raise ValueError("QuestionType is unrecognized:", question.question_type)
+
+
+            # earned_points = int(question.points * multiplier)
+            # self.max_score += question.points
+
+            # if is_correct:
+            #     self.score += earned_points
+            #     self.correct_streak += 1
+            #     print(f"✓ {feedback}")
+            #     print(f"  +{earned_points} points")
+            #     print(f" correct streak = {self.correct_streak}")
+            # else:
+            #     self.correct_streak -= 1
+            #     print(f"✗ {feedback}")
+            #     print(f"  +0 points")
+
+            # Update difficulty based on streak
+            # self.update_difficulty()
+
+            # question_num += 1
 
         self.show_results()
 
