@@ -20,7 +20,8 @@ Aims at being platform agnostic.
 
 1. test all forms of questions and develop parsers
    - [X] text
-   - [ ] quantitative
+   - [X] quantitative
+   - [X] multichoice
 2. develop self-retry
 3. develop error-correction
 
@@ -53,3 +54,12 @@ python -c "from gamified_exam import GamifiedExam; print('Success!')"
 
 You can use =notebooks/dev.ipynb= to load functions and experiment with
 them, or run =python exam.py= in your terminal for the full test run.
+
+** Example
+
+In an iPython session:
+#+BEGIN_SRC python
+  from gamified_exam import GamifiedExam
+  exam = GamifiedExam("data/exam_questions.txt")
+  exam.run_exam()
+#+END_SRC
