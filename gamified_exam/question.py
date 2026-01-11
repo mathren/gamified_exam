@@ -8,7 +8,7 @@ class QuestionType(Enum):
     QUANTITY = 1
     MULTICHOICE = 2
     LIST = 3
-    # GRAPH = 4  # To be implemented
+    GRAPH = 4
 
 
 class Difficulty(Enum):
